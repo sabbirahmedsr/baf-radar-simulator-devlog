@@ -66,14 +66,24 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('room-design-3d-canvas')) {
       new ThreeDViewer({
         canvasId: 'room-design-3d-canvas',
-        modelPath: 'models/room_layout.glb', // Placeholder for your model
+        modelPath: 'models/room_layout.glb',
         controls: {
           reset: 'room-design-reset-btn',
           maximize: 'room-design-maximize-btn',
           grid: 'room-design-grid-btn',
           camera: 'room-design-camera-btn',
+          markers: 'room-design-markers-btn',
         },
-        groundLevel: -0.05 // Lowered by 5cm
+        groundLevel: -0.05,
+        markers: [
+          { nodeName: 'Marker_Server', label: 'SERVER', detail: 'Core & Network', type: 'server' },
+          { nodeName: 'Marker_Pilot_01', label: 'PILOT 1', detail: 'Officer / Pilot Station', type: 'officer' },
+          { nodeName: 'Marker_Pilot_02', label: 'PILOT 2', detail: 'Officer / Pilot Station', type: 'officer' },
+          { nodeName: 'Marker_Pilot_03', label: 'PILOT 3', detail: 'Officer / Pilot Station', type: 'officer' },
+          { nodeName: 'Marker_Pilot_04', label: 'PILOT 4', detail: 'Officer / Pilot Station', type: 'officer' },
+          { nodeName: 'Marker_Instructor', label: 'INSTRUCTOR', detail: 'Master Console', type: 'server' },
+          { nodeName: 'Marker_Student', label: 'STUDENT', detail: 'Student / ATC Station', type: 'student' }
+        ]
       });
     }
   };

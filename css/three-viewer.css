@@ -1,0 +1,272 @@
+/* ==========================================================================
+   3D Viewer Component & Dynamic 2D Markers
+   ========================================================================== */
+
+.animation-container {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    margin-top: 20px;
+    aspect-ratio: 2.5 / 1;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    background-color: #0d1a26;
+}
+
+.animation-container canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Fullscreen Mode */
+.animation-container.fullscreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 2000;
+    border-radius: 0;
+    border: none;
+    background-color: var(--bg-dark);
+    margin-top: 0;
+}
+
+.animation-container.fullscreen canvas {
+    aspect-ratio: auto;
+    width: 100%;
+    height: 100%;
+}
+
+/* --- Primary Controls (Bottom Center) --- */
+.diorama-3d-controls {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 10px;
+    background: rgba(44, 44, 52, 0.85);
+    padding: 8px;
+    border-radius: 6px;
+    z-index: 10;
+}
+
+.diorama-3d-controls button {
+    background-color: var(--panel-dark);
+    border-color: var(--border-color);
+    flex: 1;
+    min-width: 110px;
+}
+
+.diorama-3d-controls button.primary {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+    color: var(--text-light);
+}
+
+/* --- View Controls (Bottom Right) --- */
+.diorama-3d-view-controls {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+}
+
+.view-control-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    background-color: rgba(44, 44, 52, 0.85);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-light);
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.view-control-btn:hover,
+.view-control-btn.active {
+    background-color: var(--accent-blue);
+    border-color: var(--accent-blue);
+}
+
+.view-control-btn i {
+    font-size: 1.3em;
+    color: var(--text-light);
+}
+
+/* Icon Toggles */
+.view-control-btn .minimize-icon,
+.view-control-btn .orthographic-icon { display: none; }
+
+.animation-container.fullscreen .view-control-btn .minimize-icon { display: block; }
+.animation-container.fullscreen .view-control-btn .maximize-icon { display: none; }
+.view-control-btn.ortho-active .orthographic-icon { display: block; }
+.view-control-btn.ortho-active .perspective-icon { display: none; }
+
+/* --- Navigation Help (Bottom Left) --- */
+.navigation-help {
+    position: absolute;
+    bottom: 15px;
+    left: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: rgba(44, 44, 52, 0.85);
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    color: var(--text-medium);
+    z-index: 10;
+    pointer-events: none;
+}
+
+.help-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.help-item i {
+    width: 16px;
+    text-align: center;
+}
+
+.help-item strong {
+    color: var(--text-light);
+}
+
+/* --- Animation Timeline (Top) --- */
+.animation-timeline {
+    position: absolute;
+    top: 15px;
+    left: 5%;
+    right: 5%;
+    display: flex;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: var(--panel-dark);
+    border: 1px solid var(--border-color);
+    z-index: 10;
+}
+
+.timeline-progress {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 0;
+    background-color: var(--accent-blue);
+    opacity: 0.3;
+    z-index: 1;
+}
+
+.timeline-step {
+    flex: 1;
+    background-color: transparent;
+    border: none;
+    border-right: 2px solid var(--text-light);
+    color: var(--text-medium);
+    padding: 8px 12px;
+    border-radius: 0;
+    cursor: pointer;
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.timeline-step:last-child { border-right: none; }
+.timeline-step:hover { background-color: rgba(255, 255, 255, 0.1); color: var(--text-light); }
+.timeline-step.active { color: var(--text-light); font-weight: bold; }
+
+/* ==========================================================================
+   2D Dynamic Station Markers (CSS2DRenderer)
+   ========================================================================== */
+
+.station-marker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    pointer-events: auto;
+    cursor: pointer;
+    user-select: none;
+    /* Anchor point sits right at the bottom tip of the stem */
+    transform: translateY(-50%); 
+    transition: opacity 0.25s ease;
+}
+
+.station-marker.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.marker-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(26, 26, 29, 0.88);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: var(--text-light);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    white-space: nowrap;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.marker-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Role Colors matching your theme */
+.marker-server .marker-dot  { background-color: var(--accent-blue);   box-shadow: 0 0 8px var(--accent-blue); }
+.marker-officer .marker-dot { background-color: var(--accent-green);  box-shadow: 0 0 8px var(--accent-green); }
+.marker-student .marker-dot { background-color: var(--accent-orange); box-shadow: 0 0 8px var(--accent-orange); }
+
+.marker-detail {
+    max-width: 0;
+    overflow: hidden;
+    opacity: 0;
+    font-weight: 400;
+    color: var(--text-medium);
+    transition: all 0.3s ease;
+}
+
+/* Hover Expansion */
+.station-marker:hover .marker-badge {
+    background: var(--bg-dark);
+    border-color: var(--text-light);
+    transform: translateY(-2px);
+}
+
+.station-marker:hover .marker-detail {
+    max-width: 160px;
+    opacity: 1;
+    margin-left: 4px;
+}
+
+/* Stem pointing directly to the 3D anchor */
+.marker-stem {
+    width: 1.5px;
+    height: 16px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.05));
+}
+
+

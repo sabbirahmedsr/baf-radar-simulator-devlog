@@ -1,30 +1,15 @@
 /**
  * Module: three-viewer.js
  *
- * This module provides a generic, reusable Three.js scene viewer. It can be
- * configured to load any GLB model and can optionally handle animations and
- * various UI controls. This is the core component for all 3D visualizations.
+ * Generic, reusable Three.js scene viewer supporting GLB models,
+ * animations, UI controls, and dynamic 2D HTML markers via CSS2DRenderer.
  */
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
 export class ThreeDViewer {
-    /**
-     * @param {object} config - The configuration object for the viewer.
-     * @param {string} config.canvasId - The ID of the canvas element.
-     * @param {string} config.modelPath - The path to the .glb model file.
-     * @param {object} [config.controls] - Optional IDs for UI control buttons.
-     * @param {string} [config.controls.play] - ID for the play/pause button.
-     * @param {string} [config.controls.reset] - ID for the reset button.
-     * @param {string} [config.controls.maximize] - ID for the fullscreen button.
-     * @param {string} [config.controls.grid] - ID for the grid toggle button.
-     * @param {string} [config.controls.camera] - ID for the camera projection button.
-     * @param {object} [config.animation] - Optional configuration for animations.
-     * @param {string} [config.animation.timeline] - ID for the timeline container.
-     * @param {object} [config.animation.states] - Key-value pairs of state names and frame numbers.
-     * @param {number} [config.groundLevel=-0.7] - The Y-position of the ground plane.
-     */
     constructor(config) {
         this.config = config;
         this.canvas = document.getElementById(config.canvasId);
@@ -35,9 +20,10 @@ export class ThreeDViewer {
         }
 
         this.animations = new Map();
+        this.markers = [];
+        this.markersVisible = true;
         this.isPlaying = false;
 
-        // Use ResizeObserver to reliably initialize when the canvas is visible and has a size.
         this.resizeObserver = new ResizeObserver(entries => {
             if (entries.length > 0 && entries[0].contentRect.width > 0) {
                 this.loadModel();
@@ -66,17 +52,27 @@ export class ThreeDViewer {
         this.orthographicCamera.position.set(0, 3, 7);
         this.camera = this.perspectiveCamera;
 
-        // --- Renderer ---
+        // --- WebGL Renderer ---
         this.renderer = new THREE.WebGLRenderer({ canvas: this.canvas, antialias: true });
         this.renderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight, false);
         this.renderer.setPixelRatio(window.devicePixelRatio);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.BasicShadowMap;
 
-        // --- Lighting ---
-        this.createLighting();
+        // --- CSS2D Renderer (Only initialized if markers are configured) ---
+        if (this.config.markers && this.config.markers.length > 0) {
+            this.labelRenderer = new CSS2DRenderer();
+            this.labelRenderer.setSize(this.canvas.clientWidth, this.canvas.clientHeight);
+            this.labelRenderer.domElement.style.position = 'absolute';
+            this.labelRenderer.domElement.style.top = '0px';
+            this.labelRenderer.domElement.style.left = '0px';
+            this.labelRenderer.domElement.style.pointerEvents = 'none';
+            this.labelRenderer.domElement.style.zIndex = '5';
+            this.canvas.parentElement.appendChild(this.labelRenderer.domElement);
+        }
 
-        // --- Sky and Ground ---
+        // --- Lighting & Sky ---
+        this.createLighting();
         this.createSkyAndGround();
 
         // --- Grid Helper ---
@@ -125,7 +121,7 @@ export class ThreeDViewer {
         const groundGeo = new THREE.PlaneGeometry(10000, 10000);
         const groundMat = new THREE.MeshLambertMaterial({ color: 0xffffff });
         groundMat.color.setHSL(0.095, 1, 0.75);
-        const ground = new THREE.Mesh(groundGeo, groundMat);        
+        const ground = new THREE.Mesh(groundGeo, groundMat);
         ground.position.y = this.config.groundLevel ?? -0.7;
         ground.rotation.x = -Math.PI / 2;
         ground.receiveShadow = true;
@@ -135,7 +131,7 @@ export class ThreeDViewer {
         const skyMat = new THREE.ShaderMaterial({
             uniforms: {
                 'topColor': { value: new THREE.Color(0x0077ff).setHSL(0.6, 1, 0.6) },
-                'bottomColor': { value: new THREE.Color(0xffffff).setHSL(0.095, 1, 0.75) },                
+                'bottomColor': { value: new THREE.Color(0xffffff).setHSL(0.095, 1, 0.75) },
                 'offset': { value: Math.abs(ground.position.y) },
                 'exponent': { value: 0.6 }
             },
@@ -158,6 +154,10 @@ export class ThreeDViewer {
                 if (child.isMesh) child.castShadow = true;
             });
 
+            if (this.config.markers && this.config.markers.length > 0) {
+                this.setupMarkers();
+            }
+
             if (gltf.animations && gltf.animations.length > 0 && this.config.animation) {
                 this.mixer = new THREE.AnimationMixer(this.model);
                 gltf.animations.forEach(clip => {
@@ -170,6 +170,41 @@ export class ThreeDViewer {
 
             this.animate();
         }, undefined, (error) => console.error(`[ThreeDViewer] Error loading model:`, error));
+    }
+
+    setupMarkers() {
+        this.config.markers.forEach(markerData => {
+            const anchorObject = this.model.getObjectByName(markerData.nodeName);
+            if (!anchorObject) {
+                console.warn(`[ThreeDViewer] Marker anchor "${markerData.nodeName}" not found in model.`);
+                return;
+            }
+
+            const markerDiv = document.createElement('div');
+            markerDiv.className = `station-marker marker-${markerData.type || 'officer'}`;
+            markerDiv.innerHTML = `
+                <div class="marker-badge">
+                    <span class="marker-dot"></span>
+                    <span class="marker-title">${markerData.label}</span>
+                    ${markerData.detail ? `<span class="marker-detail">• ${markerData.detail}</span>` : ''}
+                </div>
+                <div class="marker-stem"></div>
+            `;
+
+            const labelObject = new CSS2DObject(markerDiv);
+            labelObject.position.set(0, markerData.yOffset || 0, 0);
+            anchorObject.add(labelObject);
+
+            this.markers.push(markerDiv);
+        });
+    }
+
+    toggleMarkers() {
+        this.markersVisible = !this.markersVisible;
+        this.markers.forEach(el => {
+            el.classList.toggle('hidden', !this.markersVisible);
+        });
+        document.getElementById(this.config.controls?.markers)?.classList.toggle('active', this.markersVisible);
     }
 
     setupEventListeners() {
@@ -185,6 +220,7 @@ export class ThreeDViewer {
         get(ctrlIds.reset)?.addEventListener('click', () => this.resetView());
         get(ctrlIds.grid)?.addEventListener('click', () => this.toggleGrid());
         get(ctrlIds.camera)?.addEventListener('click', () => this.toggleCameraProjection());
+        get(ctrlIds.markers)?.addEventListener('click', () => this.toggleMarkers());
 
         document.addEventListener('fullscreenchange', () => {
             const container = this.canvas.closest('.animation-container');
@@ -211,6 +247,9 @@ export class ThreeDViewer {
 
         this.camera.updateProjectionMatrix();
         this.renderer.setSize(width, height, false);
+        if (this.labelRenderer) {
+            this.labelRenderer.setSize(width, height);
+        }
     }
 
     animate() {
@@ -221,6 +260,9 @@ export class ThreeDViewer {
         }
         this.controls.update();
         this.renderer.render(this.scene, this.camera);
+        if (this.labelRenderer) {
+            this.labelRenderer.render(this.scene, this.camera);
+        }
     }
 
     resetView() {
@@ -272,7 +314,6 @@ export class ThreeDViewer {
         const timelineContainer = document.getElementById(timelineId);
         if (!timelineContainer || !states) return;
 
-        // Size timeline buttons based on duration
         const firstAction = this.animations.values().next().value;
         const totalDuration = firstAction.getClip().duration;
         const stateKeys = Object.keys(states);
@@ -287,15 +328,14 @@ export class ThreeDViewer {
             if (button) button.style.flexGrow = duration;
         }
 
-        // Add timeline click listener
         timelineContainer.addEventListener('click', (e) => {
             if (e.target.classList.contains('timeline-step')) {
                 this.goToState(e.target.dataset.state);
             }
         });
 
-        this.goToState(stateKeys[0]); // Go to initial state
-        this.toggleAnimation(); // Autoplay
+        this.goToState(stateKeys[0]);
+        this.toggleAnimation();
     }
 
     toggleAnimation() {
@@ -314,7 +354,7 @@ export class ThreeDViewer {
         const frame = this.config.animation.states[state];
         if (typeof frame !== 'number') return;
 
-        const time = frame / 24; // Assuming 24 FPS
+        const time = frame / 24;
         this.animations.forEach(action => {
             action.time = time;
             action.paused = false;
@@ -334,11 +374,9 @@ export class ThreeDViewer {
         const currentTime = firstAction.time;
         const totalDuration = firstAction.getClip().duration;
 
-        // Update progress bar
         const progressIndicator = timelineContainer.querySelector('.timeline-progress');
         progressIndicator.style.width = `${(currentTime / totalDuration) * 100}%`;
 
-        // Determine active state
         let activeState = null;
         const stateKeys = Object.keys(states);
         for (let i = stateKeys.length - 1; i >= 0; i--) {
@@ -349,7 +387,6 @@ export class ThreeDViewer {
             }
         }
 
-        // Update button styles
         if (timelineContainer.dataset.currentState !== activeState) {
             timelineContainer.dataset.currentState = activeState;
             timelineContainer.querySelectorAll('.timeline-step').forEach(btn => {
