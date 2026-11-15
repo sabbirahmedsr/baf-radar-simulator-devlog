@@ -42,14 +42,14 @@ export class ThreeDViewer {
         // --- Camera ---
         const aspect = this.canvas.clientWidth / this.canvas.clientHeight;
         this.perspectiveCamera = new THREE.PerspectiveCamera(30, aspect, 0.1, 1000);
-        this.perspectiveCamera.position.set(0, 3, 7);
+        this.perspectiveCamera.position.set(0, 5.5, 6);
 
         const frustumSize = 5;
         this.orthographicCamera = new THREE.OrthographicCamera(
             frustumSize * aspect / -2, frustumSize * aspect / 2,
             frustumSize / 2, frustumSize / -2, 0.1, 1000
         );
-        this.orthographicCamera.position.set(0, 3, 7);
+        this.orthographicCamera.position.set(0, 5.5, 6);
         this.camera = this.perspectiveCamera;
 
         // --- WebGL Renderer ---
