@@ -1,6 +1,7 @@
 <div class="room-design-container">
     <h2>Hardware Plan</h2>
 
+
     <h3>Conceptual Room Layout</h3>
     <p>This is an interactive 3D model of the proposed room layout. You can rotate, pan, and zoom to inspect the arrangement of the server, network switch, and client stations.</p>
     <div class="animation-container" id="room-design-3d-container">
@@ -29,12 +30,14 @@
         </div>
     </div>
 
+
     <h3>Network Topology Diagram</h3>
     <div class="layout-diagram">
         <svg class="connection-lines"></svg>
         <div id="station-server" class="computer-box server">
             <i class="fa-solid fa-server"></i>
             <span>Server</span>
+            <small style="color: var(--accent-green); font-size: 0.75em;">(Existing ATC Server)</small>
         </div>
         <div id="station-switch" class="computer-box network-switch">
             <i class="fa-solid fa-network-wired"></i>
@@ -42,65 +45,181 @@
         </div>
         <div class="client-stations">
             <div class="station-group">
-                <h4>Officer/Pilot Stations (5)</h4>
-                <div id="station-c1" class="computer-box client officer"><i class="fa-solid fa-desktop"></i><span>C1</span></div>
-                <div id="station-c2" class="computer-box client officer"><i class="fa-solid fa-desktop"></i><span>C2</span></div>
-                <div id="station-c3" class="computer-box client officer"><i class="fa-solid fa-desktop"></i><span>C3</span></div>
-                <div id="station-c4" class="computer-box client officer"><i class="fa-solid fa-desktop"></i><span>C4</span></div>
-                <div id="station-c5" class="computer-box client officer"><i class="fa-solid fa-desktop"></i><span>C5</span></div>
+                <h4>Pilot Stations (4)</h4>
+                <div id="station-p1" class="computer-box client officer">
+                    <i class="fa-solid fa-desktop"></i>
+                    <span>Pilot 1 (DEP)</span>
+                    <small style="color: var(--accent-orange); font-size: 0.7em;">[Existing]</small>
+                </div>
+                <div id="station-p2" class="computer-box client officer">
+                    <i class="fa-solid fa-desktop"></i>
+                    <span>Pilot 2 (ARR)</span>
+                    <small style="color: var(--accent-orange); font-size: 0.7em;">[Existing]</small>
+                </div>
+                <div id="station-p3" class="computer-box client officer">
+                    <i class="fa-solid fa-desktop"></i>
+                    <span>Pilot 3</span>
+                    <small style="color: var(--accent-blue); font-size: 0.7em;">[Proposed]</small>
+                </div>
+                <div id="station-p4" class="computer-box client officer">
+                    <i class="fa-solid fa-desktop"></i>
+                    <span>Pilot 4</span>
+                    <small style="color: var(--accent-blue); font-size: 0.7em;">[Proposed]</small>
+                </div>
             </div>
             <div class="station-group">
-                <h4>Student Stations (2)</h4>
-                <div id="station-s1" class="computer-box client student"><i class="fa-solid fa-desktop"></i><span>S1</span></div>
-                <div id="station-s2" class="computer-box client student"><i class="fa-solid fa-desktop"></i><span>S2</span></div>
+                <h4>Student Station (1)</h4>
+                <div id="station-s1" class="computer-box client student">
+                    <i class="fa-solid fa-desktop"></i>
+                    <span>Student</span>
+                    <small style="color: var(--accent-blue); font-size: 0.7em;">[Proposed]</small>
+                </div>
+            </div>
+            <div class="station-group">
+                <h4>Instructor Station (1)</h4>
+                <div id="station-i1" class="computer-box client server">
+                    <i class="fa-solid fa-user-tie"></i>
+                    <span>Instructor</span>
+                    <small style="color: var(--accent-blue); font-size: 0.7em;">[Proposed]</small>
+                </div>
             </div>
         </div>
     </div>
+
+
 
     <h3>Station Configuration</h3>
-    <p>Each station is configured with specific hardware and software roles. All client stations read aircraft data from the server and synchronize in real-time to ensure a cohesive training environment.</p>
+    <p>Each station is configured with specific hardware and software roles. The architecture utilizes the <strong>Existing ATC Server</strong> as the core master node, while client stations synchronize in real-time to ensure a cohesive training environment.</p>
+    
+    <!-- Top Full-Width Server Card -->
+    <div class="server-full-card">
+        <div class="card-header">
+            <i class="fa-solid fa-server"></i>
+            <h4>Master Server <span style="font-size: 0.8em; color: var(--accent-green); font-weight: normal;">[Existing ATC Server - Reutilized for Radar Simulation]</span></h4>
+        </div>
+        <div class="server-full-body">
+            <ul class="server-specs-grid">
+                <li><strong>PC Specification:</strong> High-End Workstation with Dedicated GPU</li>
+                <li><strong>Display Setup:</strong> 1x Monitor + Tripple Screens </li>
+                <li><strong>Peripherals:</strong> Keyboard, Mouse, Master PTT Headset</li>
+                <li><strong>Core Role:</strong> Manages simulation state, master ASR/PAR overview, & network sync</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Bottom 3-Column Cards (Instructor, Pilot, Student) -->
     <div class="software-architecture-grid">
+        <!-- Instructor Card -->
         <div class="software-card server-software">
-            <div class="card-header"><i class="fa-solid fa-server"></i><h4>Server & Instructor</h4></div>
+            <div class="card-header"><i class="fa-solid fa-user-tie"></i><h4>Instructor</h4></div>
             <div class="card-body">
                 <ul>
-                    <li><strong>PC:</strong> High-End with dedicated GPU</li>
-                    <li><strong>Displays:</strong> 1x Large TV, 2x Monitors</li>
-                    <li><strong>Peripherals:</strong> Keyboard, Mouse, Headset</li>
-                    <li class="role-item">Manages the core simulation state</li>
-                    <li class="role-item">Provides master ASR/PAR overview</li>
-                    <li class="role-item">Has master control over the simulation</li>
+                    <li><strong>PC:</strong> Mid-Range </li>
+                    <li><strong>Displays:</strong> 2x Monitor (ASR / PAR Scopes)</li>
+                    <li><strong>Peripherals:</strong> Keyboard, Mouse, PTT Headset</li>
+                    <li class="role-item">Master control over simulation scenarios</li>
+                    <li class="role-item">Injects malfunctions & weather updates</li>
+                    <li class="role-item">Instructor override & channel monitoring</li>
                 </ul>
             </div>
         </div>
+
+        <!-- Pilot Card -->
         <div class="software-card officer-software">
-            <div class="card-header"><i class="fa-solid fa-user-tie"></i><h4>Officer/Pilot</h4></div>
+            <div class="card-header"><i class="fa-solid fa-desktop"></i><h4>Pilot (1 to 4)</h4></div>
             <div class="card-body">
                 <ul>
                     <li><strong>PC:</strong> Mid-Range</li>
                     <li><strong>Displays:</strong> 1x Monitor</li>
-                    <li><strong>Peripherals:</strong> Keyboard, Mouse, Headset</li>
+                    <li><strong>Peripherals:</strong> Keyboard, Mouse, PTT Headset</li>
                     <li class="role-item">Receives real-time simulation data</li>
-                    <li class="role-item">Full interactive ASR/PAR view</li>
-                    <li class="role-item">PTT voice for pilot communication</li>
+                    <li class="role-item">Executes manual heading, alt, speed inputs</li>
+                    <li class="role-item">PTT voice communication with controllers</li>
                 </ul>
             </div>
         </div>
+
+        <!-- Student Card -->
         <div class="software-card student-software">
-            <div class="card-header"><i class="fa-solid fa-user-graduate"></i><h4>Student/ATC</h4></div>
+            <div class="card-header"><i class="fa-solid fa-user-graduate"></i><h4>Student / ATC</h4></div>
             <div class="card-body">
                 <ul>
                     <li><strong>PC:</strong> Mid-Range</li>
-                    <li><strong>Displays:</strong> 1x Monitor</li>
-                    <li><strong>Peripherals:</strong> Keyboard, Mouse, Headset</li>
+                    <li><strong>Displays:</strong> 2x Monitor (ASR / PAR Scopes)</li>
+                    <li><strong>Peripherals:</strong> Keyboard, Mouse, PTT Headset</li>
                     <li class="role-item">Receives real-time simulation data</li>
-                    <li class="role-item">Read-only ASR/PAR view</li>
-                    <li class="role-item">PTT voice for ATC control</li>
+                    <li class="role-item">Active ASR/PAR approach & separation view</li>
+                    <li class="role-item">PTT voice for air traffic control</li>
                 </ul>
             </div>
         </div>
     </div>
 
+
+
+
+    <h3>Hardware Resource & Procurement Summary</h3>
+    <p>To optimize cost and maximize existing infrastructure, the Radar Simulator reuses core ATC hardware while proposing only the essential client workstations required for full multi-role operations.</p>
+    
+    <div class="plan-details" style="margin-top: 20px;">
+        <!-- Column 1: Existing Hardware (Re-utilized) -->
+        <div class="plan-column">
+            <h4 style="color: var(--accent-orange); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-top: 0;">
+                <i class="fa-solid fa-recycle"></i> Existing Hardware (To Be Re-utilized)
+            </h4>
+            <ul>
+                <li style="border-left-color: var(--accent-orange);">
+                    <strong>1x Master Server PC:</strong> Existing ATC Server (High-End PC + Trio Screens) will act as the central simulation engine.
+                </li>
+                <li style="border-left-color: var(--accent-orange);">
+                    <strong>2x Pilot Stations (Pilot 1 & Pilot 2):</strong> Existing Departure (DEP) and Arrival (ARR) consoles will be integrated directly.
+                </li>
+                <li style="border-left-color: var(--accent-orange);">
+                    <strong>Core LAN Infrastructure:</strong> Existing network switch and room wiring framework.
+                </li>
+            </ul>
+        </div>
+
+        <!-- Column 2: New Hardware (Proposed for Purchase) -->
+        <div class="plan-column">
+            <h4 style="color: var(--accent-blue); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-top: 0;">
+                <i class="fa-solid fa-cart-plus"></i> New Hardware (Proposed Procurement)
+            </h4>
+            <ul>
+                <li style="border-left-color: var(--accent-blue);">
+                    <strong>1x Instructor Workstation:</strong> Mid-range PC with <strong>2x Monitors</strong> (for Master ASR/PAR oversight) + PTT Headset.
+                </li>
+                <li style="border-left-color: var(--accent-blue);">
+                    <strong>1x Student / ATC Workstation:</strong> Mid-range PC with <strong>2x Monitors</strong> (for dedicated ASR & PAR scopes) + PTT Headset.
+                </li>
+                <li style="border-left-color: var(--accent-blue);">
+                    <strong>2x Additional Pilot Workstations (Pilot 3 & Pilot 4):</strong> Mid-range PCs, each with <strong>1x Monitor</strong> + PTT Headset.
+                </li>
+            </ul>
+        </div>
+    </div>
+
+
+    <!-- Full-Width Additional Peripherals & Voice Hardware Note -->
+    <div class="server-full-card" style="margin-top: 20px; border-left-color: var(--accent-green);">
+        <div class="card-header">
+            <i class="fa-solid fa-headset" style="color: var(--accent-green);"></i>
+            <h4>Shared Peripherals & Custom Voice Hardware <span style="font-size: 0.8em; color: var(--text-medium); font-weight: normal;">[System-Wide Requirement]</span></h4>
+        </div>
+        <div class="server-full-body">
+            <ul class="server-specs-grid">
+                <li>
+                    <strong style="color: var(--accent-green);">PTT Headsets (All Stations):</strong>
+                    Dedicated Push-to-Talk (PTT) headsets are required across <u>ALL STATIONS</u> (both existing and newly proposed), as current ATC terminals lack PTT-compatible headsets.
+                </li>
+                <li>
+                    <strong style="color: var(--accent-green);">Custom Voice Control Hardware:</strong>
+                    Additional dedicated audio interfaces, PTT switches, or custom voice control hardware may be required depending on final system architecture discussions.
+                </li>
+            </ul>
+        </div>
+    </div>
+    
     <div class="plan-details">
         <div class="plan-column">
             <h3>Network & Cable Management</h3>

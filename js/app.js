@@ -77,12 +77,14 @@ document.addEventListener('DOMContentLoaded', () => {
         groundLevel: -0.05,
         markers: [
           { nodeName: 'Marker_Server', label: 'SERVER', detail: 'Core & Network', type: 'server' },
-          { nodeName: 'Marker_Pilot_01', label: 'PILOT 1', detail: 'Officer / Pilot Station', type: 'officer' },
-          { nodeName: 'Marker_Pilot_02', label: 'PILOT 2', detail: 'Officer / Pilot Station', type: 'officer' },
+          { nodeName: 'Marker_Pilot_01', label: 'PILOT 1 + DEP', detail: 'Pilot Station + Departure', type: 'officer' },
+          { nodeName: 'Marker_Pilot_02', label: 'PILOT 2 + ARR', detail: 'Pilot Station + Arrival', type: 'officer' },
           { nodeName: 'Marker_Pilot_03', label: 'PILOT 3', detail: 'Officer / Pilot Station', type: 'officer' },
           { nodeName: 'Marker_Pilot_04', label: 'PILOT 4', detail: 'Officer / Pilot Station', type: 'officer' },
           { nodeName: 'Marker_Instructor', label: 'INSTRUCTOR', detail: 'Master Console', type: 'server' },
-          { nodeName: 'Marker_Student', label: 'STUDENT', detail: 'Student / ATC Station', type: 'student' }
+          { nodeName: 'Marker_Student', label: 'STUDENT', detail: 'Student / ATC Station', type: 'student' },
+          { nodeName: 'Marker_ATC_Student', label: 'ATC STUDENT', detail: 'ATC Station', type: 'student' },
+          { nodeName: 'Marker_Tripple_Screen', label: 'TRIO SCREEN', detail: 'TRIPPLE TV SCREEN', type: 'server' }
         ]
       });
     }

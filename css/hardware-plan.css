@@ -151,3 +151,63 @@
     padding-top: 10px;
     border-top: 1px dashed var(--border-color);
 }
+
+
+/* --- Full-Width Server Card Style --- */
+.server-full-card {
+    background-color: var(--bg-dark);
+    border: 1px solid var(--border-color);
+    border-left: 4px solid var(--accent-blue);
+    border-radius: 8px;
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.server-full-card .card-header {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 20px;
+    background-color: var(--panel-dark);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.server-full-card .card-header i {
+    font-size: 1.5em;
+    color: var(--accent-blue);
+}
+
+.server-full-card .card-header h4 {
+    margin: 0;
+    font-size: 1.1em;
+    color: var(--text-light);
+}
+
+/* Make the body items inside the full-width card layout nicely in columns or clean rows */
+.server-full-body {
+    padding: 20px;
+}
+
+.server-specs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.server-specs-grid li {
+    background: var(--panel-dark);
+    padding: 12px 15px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    color: var(--text-light);
+    font-size: 0.95em;
+}
+
+.server-specs-grid li strong {
+    color: var(--accent-blue);
+    display: block;
+    margin-bottom: 4px;
+}
