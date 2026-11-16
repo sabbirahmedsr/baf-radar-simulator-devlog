@@ -1,28 +1,135 @@
 <div id="par-container">
-  <div id="par-display-container">
-    <div class="par-scope">
-      <h3 class="scope-title">Localizer (Azimuth)</h3>
-      <canvas id="parLocalizerCanvas"></canvas>
-    </div>
-    <div class="par-scope">
-      <h3 class="scope-title">Glideslope (Elevation)</h3>
-      <canvas id="parGlideslopeCanvas"></canvas>
-    </div>
-  </div>
-  <div id="parSidePanel">
-    <h3>Selected Target</h3>
-    <div id="parDataPanel" class="dataBlock">No selection</div>
-    
-    <h3>PAR Controls</h3>
-    <div class="control-group">
-        <label for="parRunwaySelect">Runway:</label>
-        <select id="parRunwaySelect">
-            <option value="14">Runway 14</option>
-            <option value="32">Runway 32</option>
-        </select>
+    <div id="par-display-container">
+        <!-- Top Status Bar matching BAF Radar Display -->
+        <div class="par-top-bar">
+            <div class="par-clock-group">
+                <span id="parLocalTime" class="par-big-clock">10:40:04</span>
+            </div>
+            <div class="par-telemetry-strip">
+                <div class="tele-cell"><span>000</span> <span class="badge-yellow">&lt;FL&gt;</span> <span>190</span><br><small>Ext</small></div>
+                <div class="tele-cell"><span>VGHS</span> <span>TL</span> <span>QNH</span> <span>1016 / 762</span><br><small>RWY 14 | 900 | WIND 170°/09kt</small></div>
+                <div class="tele-cell"><span>○ 00:00</span><br><small>☀ 11:13</small></div>
+                <div class="tele-cell"><strong>MultiTrack</strong><br><small>CA &nbsp; SYS &nbsp; HZD</small></div>
+                <div class="tele-cell"><span class="badge-red">IND</span><br><small>Scale 171</small></div>
+                <div class="tele-cell"><span>Metric</span><br><span class="badge-green">Imperial</span></div>
+                <div class="tele-cell"><strong>BAF</strong><br><small>Controller PAR</small></div>
+            </div>
+            <div class="par-date-group">
+                <span id="parUtcTime" class="par-utc-clock">04:40:04</span>
+                <span id="parDateText" class="par-date">11.11.2026</span>
+            </div>
+        </div>
+
+        <!-- Dual Scope Canvas Area (Elevation on Top, Azimuth on Bottom) -->
+        <div class="par-scopes-wrapper">
+            <div class="par-scope">
+                <div class="scope-label-overlay">ELEVATION (GLIDESLOPE / HEIGHT)</div>
+                <canvas id="parGlideslopeCanvas"></canvas>
+            </div>
+            
+            <!-- Clean Scope Divider Bar -->
+            <div class="par-middle-bar"></div>
+
+            <div class="par-scope">
+                <div class="scope-label-overlay">AZIMUTH (LOCALIZER / COURSE)</div>
+                <canvas id="parLocalizerCanvas"></canvas>
+            </div>
+        </div>
     </div>
 
-    <h3>Log</h3>
-    <div id="parLogPanel" class="dataBlock">PAR System Standby.</div>
-  </div>
+    <!-- PAR Controller Side Panel -->
+    <div id="parSidePanel">
+        <div class="panel-header-badge">
+            <h3>PAR ATC Controller</h3>
+            <span class="status-pill active" id="parPilotStatusPill">PILOT STANDBY</span>
+        </div>
+
+        <!-- Icon-based Display Toggle Toolbar -->
+        <div class="par-icon-toolbar">
+            <button class="icon-toggle-btn active" id="btnToggleClutter" title="Toggle Dynamic Clutter & Noise">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20M2 6h20M2 18h20"/></svg>
+                <span>Clutter</span>
+            </button>
+            <button class="icon-toggle-btn active" id="btnToggleTrails" title="Toggle History Trails">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+                <span>Trails</span>
+            </button>
+            <button class="icon-toggle-btn active" id="btnToggleCorridor" title="Toggle Safety Funnel">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6l9 12 9-12"/></svg>
+                <span>Funnel</span>
+            </button>
+            <button class="icon-toggle-btn active" id="btnToggleTags" title="Toggle Deviation Tags">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+                <span>Tags</span>
+            </button>
+            <button class="icon-toggle-btn" id="btnTogglePause" title="Freeze Simulation">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+                <span>Pause</span>
+            </button>
+        </div>
+        
+        <div class="par-control-section">
+            <label for="parAircraftSelect" style="font-size:12px; color:var(--text-medium);">Selected Approach Track</label>
+            <select id="parAircraftSelect" class="par-select"></select>
+        </div>
+
+        <!-- Live Aircraft Telemetry Readout -->
+        <div class="par-control-section">
+            <div class="telemetry-card" id="parSelectedReadout">
+                <div>No Aircraft Selected</div>
+            </div>
+        </div>
+
+        <!-- ATC Instructions (Realistic Delayed Pilot Execution) -->
+        <div class="par-control-section">
+            <h4>ATC Flight Vectors (RWY 144°)</h4>
+            
+            <!-- Assigned Heading Control -->
+            <div class="par-slider-group">
+                <div class="slider-header">
+                    <span>Assigned Heading (Cur: <strong id="parCurHdg">144°</strong>)</span>
+                    <span id="parTargetHdgVal">144°</span>
+                </div>
+                <input type="range" id="parHeadingSlider" min="100" max="190" step="1" value="144">
+                <div class="btn-row">
+                    <button class="par-action-btn" id="parHdgLeftBtn">◀ Left 5°</button>
+                    <button class="par-action-btn secondary" id="parInterceptBtn">Capture ILS/PAR</button>
+                    <button class="par-action-btn" id="parHdgRightBtn">Right 5° ▶</button>
+                </div>
+            </div>
+
+            <!-- Assigned Altitude Control -->
+            <div class="par-slider-group">
+                <div class="slider-header">
+                    <span>Assigned Altitude (Cur: <strong id="parCurAlt">2500ft</strong>)</span>
+                    <span id="parTargetAltVal">2500 ft</span>
+                </div>
+                <input type="range" id="parAltitudeSlider" min="200" max="4500" step="50" value="2500">
+                <div class="btn-row">
+                    <button class="par-action-btn" id="parAltDownBtn">▼ -200 ft</button>
+                    <button class="par-action-btn secondary" id="parFollowGsBtn">Follow 3° GS</button>
+                    <button class="par-action-btn" id="parAltUpBtn">▲ +200 ft</button>
+                </div>
+            </div>
+
+            <!-- Assigned Airspeed Control -->
+            <div class="par-slider-group">
+                <div class="slider-header">
+                    <span>Assigned Speed (Cur: <strong id="parCurSpd">150kt</strong>)</span>
+                    <span id="parTargetSpdVal">150 kt</span>
+                </div>
+                <input type="range" id="parSpeedSlider" min="100" max="240" step="5" value="150">
+                <div class="btn-row">
+                    <button class="par-action-btn" id="parSpdDownBtn">-10 kt</button>
+                    <button class="par-action-btn secondary" id="parFinalSpdBtn">Vref 125kt</button>
+                    <button class="par-action-btn" id="parSpdUpBtn">+10 kt</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="par-control-section btn-row">
+            <button id="parSpawnBtn" class="par-main-btn primary">+ Spawn Approach</button>
+            <button id="parResetBtn" class="par-main-btn">Reset Demo</button>
+        </div>
+    </div>
 </div>
